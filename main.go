@@ -65,8 +65,6 @@ func main() {
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "There is no active stream.")
 					bot.Send(msg)
 				}
-
-				// Handle resend command
 			}
 		} else {
 			go func(userStats *user.UsageTracker) {

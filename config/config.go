@@ -70,7 +70,8 @@ func getEnvAsIntList(name string) []int64 {
 	for _, str := range strings.Split(valueStr, ",") {
 		value, err := strconv.ParseInt(strings.TrimSpace(str), 10, 64)
 		if err != nil {
-			log.Fatalf("Invalid value for environment variable %s: %v", name, err)
+			log.Printf("Invalid value for environment variable %s: %v", name, err)
+			continue
 		}
 		values = append(values, value)
 	}
