@@ -51,17 +51,21 @@ func main() {
 			case "reset":
 				// Handle reset command
 			case "stats":
-				// Handle stats command
+
+				userStats := usage_tracker.NewUsageTracker(strconv.FormatInt(update.SentFrom().ID, 10), update.SentFrom().UserName, "logs")
+				cost := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Current cost: "+cost+"$")
+				bot.Send(msg)
 			case "resend":
 				// Handle resend command
 			}
 		} else {
 			go func() {
 				// Handle user message
-				UserBank := usage_tracker.NewUsageTracker(strconv.FormatInt(update.SentFrom().ID, 10), update.SentFrom().UserName, "logs")
-				if UserBank.HaveAccess(conf) {
+				userStats := usage_tracker.NewUsageTracker(strconv.FormatInt(update.SentFrom().ID, 10), update.SentFrom().UserName, "logs")
+				if userStats.HaveAccess(conf) {
 					responseID := handleChatGPTStreamResponse(bot, client, update.Message, conf)
-					UserBank.GetUsageFromApi(responseID, conf)
+					userStats.GetUsageFromApi(responseID, conf)
 				} else {
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You have exceeded your budget limit.")
 					_, err := bot.Send(msg)
