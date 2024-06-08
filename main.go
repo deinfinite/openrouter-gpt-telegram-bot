@@ -4,7 +4,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	openai "github.com/sashabaranov/go-openai"
 	"gptBot/config"
-	"gptBot/usage_tracker"
+	"gptBot/user"
 	"log"
 	"strconv"
 )
@@ -38,33 +38,34 @@ func main() {
 	clientOptions.BaseURL = conf.OpenAIBaseURL
 	client := openai.NewClientWithConfig(clientOptions)
 
+	userManager := user.NewUserManager("logs")
+
 	for update := range updates {
 		if update.Message == nil {
 			continue
 		}
-
+		userStats := userManager.GetUser(update.SentFrom().ID, update.SentFrom().UserName)
 		if update.Message.IsCommand() {
 			switch update.Message.Command() {
 			case "help":
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Available commands: /help, /reset, /stats, /resend")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Available commands: /help, /reset, /stats")
 				bot.Send(msg)
 			case "reset":
-				// Handle reset command
-			case "stats":
-
-				userStats := usage_tracker.NewUsageTracker(strconv.FormatInt(update.SentFrom().ID, 10), update.SentFrom().UserName, "logs")
-				cost := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Current cost: "+cost+"$")
+				userStats.ClearHistory()
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "History cleared.")
 				bot.Send(msg)
-			case "resend":
+			case "stats":
+				usage := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Current usage: "+usage+"$ Message history: "+strconv.Itoa(len(userStats.GetMessages())))
+				bot.Send(msg)
+			case "stop":
 				// Handle resend command
 			}
 		} else {
-			go func() {
+			go func(userStats *user.UsageTracker) {
 				// Handle user message
-				userStats := usage_tracker.NewUsageTracker(strconv.FormatInt(update.SentFrom().ID, 10), update.SentFrom().UserName, "logs")
 				if userStats.HaveAccess(conf) {
-					responseID := handleChatGPTStreamResponse(bot, client, update.Message, conf)
+					responseID := handleChatGPTStreamResponse(bot, client, update.Message, conf, userStats)
 					userStats.GetUsageFromApi(responseID, conf)
 				} else {
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You have exceeded your budget limit.")
@@ -74,7 +75,7 @@ func main() {
 					}
 				}
 
-			}()
+			}(userStats)
 		}
 	}
 }

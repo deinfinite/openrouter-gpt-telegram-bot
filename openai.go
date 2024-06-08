@@ -7,28 +7,37 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sashabaranov/go-openai"
 	"gptBot/config"
+	"gptBot/user"
 	"io"
 	"log"
 	"time"
 )
 
-func handleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, message *tgbotapi.Message, config *config.Config) string {
+func handleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, message *tgbotapi.Message, config *config.Config, user *user.UsageTracker) string {
 	ctx := context.Background()
-	req := openai.ChatCompletionRequest{
-		Model:       config.Model,
-		MaxTokens:   config.MaxTokens,
-		Temperature: config.Temperature,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    openai.ChatMessageRoleSystem,
-				Content: config.SystemPrompt, // Add the system prompt here
-			},
-			{
-				Role:    openai.ChatMessageRoleUser,
-				Content: message.Text,
-			},
+	user.CheckHistory(config.MaxHistorySize)
+	messages := []openai.ChatCompletionMessage{
+		{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: config.SystemPrompt,
 		},
-		Stream: true,
+	}
+	log.Println(user.GetMessages())
+	for _, msg := range user.GetMessages() {
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    msg.Role,
+			Content: msg.Content,
+		})
+	}
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: message.Text,
+	})
+	req := openai.ChatCompletionRequest{
+		Model:     config.Model,
+		MaxTokens: config.MaxTokens,
+		Messages:  messages,
+		Stream:    true,
 	}
 	stream, err := client.CreateChatCompletionStream(ctx, req)
 	if err != nil {
@@ -50,6 +59,7 @@ func handleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 		}
 		if errors.Is(err, io.EOF) {
 			fmt.Println("\nStream finished, response ID:", responseID)
+			user.AddMessage(openai.ChatMessageRoleAssistant, messageText)
 			editMsg := tgbotapi.NewEditMessageText(message.Chat.ID, lastMessageID, messageText)
 			_, err := bot.Send(editMsg)
 			if err != nil {
@@ -76,7 +86,7 @@ func handleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 			lastSentTime = time.Now()
 		} else {
 			messageText += response.Choices[0].Delta.Content
-			if time.Since(lastSentTime) >= 700*time.Millisecond {
+			if time.Since(lastSentTime) >= 1000*time.Millisecond {
 				editMsg := tgbotapi.NewEditMessageText(message.Chat.ID, lastMessageID, messageText)
 				_, err := bot.Send(editMsg)
 				if err != nil {
@@ -91,17 +101,29 @@ func handleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 
 }
 
-func handleChatGPTResponse(bot *tgbotapi.BotAPI, client *openai.Client, message *tgbotapi.Message, config *config.Config) string {
+func handleChatGPTResponse(bot *tgbotapi.BotAPI, client *openai.Client, message *tgbotapi.Message, config *config.Config, user *user.UsageTracker) string {
+	messages := []openai.ChatCompletionMessage{
+		{
+			Role:    openai.ChatMessageRoleSystem,
+			Content: config.SystemPrompt,
+		},
+	}
+	for _, msg := range user.GetMessages() {
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    msg.Role,
+			Content: msg.Content,
+		})
+	}
+	messages = append(messages, openai.ChatCompletionMessage{
+		Role:    openai.ChatMessageRoleUser,
+		Content: message.Text,
+	})
+
 	req := openai.ChatCompletionRequest{
 		Model:       config.Model,
 		MaxTokens:   config.MaxTokens,
 		Temperature: config.Temperature,
-		Messages: []openai.ChatCompletionMessage{
-			{
-				Role:    "user",
-				Content: message.Text,
-			},
-		},
+		Messages:    messages,
 	}
 	ctx := context.Background()
 	resp, err := client.CreateChatCompletion(ctx, req)
@@ -114,6 +136,7 @@ func handleChatGPTResponse(bot *tgbotapi.BotAPI, client *openai.Client, message 
 
 	answer := resp.Choices[0].Message.Content
 	msg := tgbotapi.NewMessage(message.Chat.ID, answer)
+	user.AddMessage(openai.ChatMessageRoleAssistant, answer)
 	bot.Send(msg)
 	return resp.ID
 }

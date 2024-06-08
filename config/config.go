@@ -22,6 +22,7 @@ type Config struct {
 	UserBudget         float32
 	AdminChatIDs       []int64
 	AllowedUserChatIDs []int64
+	MaxHistorySize     int
 }
 
 func LoadConfig() (*Config, error) {
@@ -44,6 +45,7 @@ func LoadConfig() (*Config, error) {
 		UserBudget:         getEnvAsFloat("USER_BUDGET", 0),
 		AdminChatIDs:       getEnvAsIntList("ADMIN_USER_IDS"),
 		AllowedUserChatIDs: getEnvAsIntList("ALLOWED_TELEGRAM_USER_IDS"),
+		MaxHistorySize:     getEnvAsInt("MAX_HISTORY_SIZE", 10),
 	}
 
 	return config, nil

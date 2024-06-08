@@ -1,10 +1,23 @@
-package usage_tracker
+package user
+
+import "sync"
 
 type UsageTracker struct {
 	UserID   string
 	UserName string
 	LogsDir  string
 	Usage    UserUsage
+	History  History
+}
+
+type Message struct {
+	Role    string
+	Content string
+}
+
+type History struct {
+	messages []Message
+	mu       sync.Mutex
 }
 
 type UserUsage struct {

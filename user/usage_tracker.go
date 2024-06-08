@@ -1,4 +1,4 @@
-package usage_tracker
+package user
 
 import (
 	"encoding/json"
@@ -17,6 +17,9 @@ func NewUsageTracker(userID, userName, logsDir string) *UsageTracker {
 		UserID:   userID,
 		UserName: userName,
 		LogsDir:  logsDir,
+		History: History{
+			messages: []Message{},
+		},
 	}
 	ut.loadOrCreateUsage()
 	return ut
