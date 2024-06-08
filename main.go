@@ -48,7 +48,7 @@ func main() {
 		if update.Message.IsCommand() {
 			switch update.Message.Command() {
 			case "help":
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Available commands: /help, /reset, /stats")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Available commands: /help, /reset, /stats, /stop")
 				bot.Send(msg)
 			case "reset":
 				userStats.ClearHistory()
@@ -56,9 +56,16 @@ func main() {
 				bot.Send(msg)
 			case "stats":
 				usage := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Current usage: "+usage+"$ Message history: "+strconv.Itoa(len(userStats.GetMessages())))
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Current usage: "+usage+"$ Messages amount: "+strconv.Itoa(len(userStats.GetMessages())))
 				bot.Send(msg)
 			case "stop":
+				if userStats.CurrentStream != nil {
+					userStats.CurrentStream.Close()
+				} else {
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "There is no active stream.")
+					bot.Send(msg)
+				}
+
 				// Handle resend command
 			}
 		} else {

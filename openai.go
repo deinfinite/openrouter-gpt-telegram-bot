@@ -47,6 +47,7 @@ func handleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 		return ""
 	}
 	defer stream.Close()
+	user.CurrentStream = stream
 	var lastMessageID int
 	var messageText string
 	var lastSentTime time.Time
@@ -65,14 +66,16 @@ func handleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 			if err != nil {
 				log.Printf("Failed to edit message: %v", err)
 			}
+			user.CurrentStream = nil
 			return responseID
 		}
 
 		if err != nil {
 			fmt.Printf("\nStream error: %v\n", err)
-			msg := tgbotapi.NewMessage(message.Chat.ID, "Stream error: "+err.Error())
+			msg := tgbotapi.NewMessage(message.Chat.ID, err.Error())
 			bot.Send(msg)
-			return ""
+			user.CurrentStream = nil
+			return responseID
 		}
 		if lastMessageID == 0 {
 			messageText += response.Choices[0].Delta.Content

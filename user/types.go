@@ -1,13 +1,17 @@
 package user
 
-import "sync"
+import (
+	"github.com/sashabaranov/go-openai"
+	"sync"
+)
 
 type UsageTracker struct {
-	UserID   string
-	UserName string
-	LogsDir  string
-	Usage    UserUsage
-	History  History
+	UserID        string
+	UserName      string
+	LogsDir       string
+	CurrentStream *openai.ChatCompletionStream
+	Usage         UserUsage
+	History       History
 }
 
 type Message struct {
