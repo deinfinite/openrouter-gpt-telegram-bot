@@ -3,9 +3,9 @@ package user
 import (
 	"encoding/json"
 	"fmt"
-	"gptBot/config"
 	"log"
 	"net/http"
+	"openrouter-gpt-telegram-bot/config"
 	"os"
 	"path/filepath"
 	"time"

@@ -3,9 +3,9 @@ package main
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	openai "github.com/sashabaranov/go-openai"
-	"gptBot/config"
-	"gptBot/user"
 	"log"
+	"openrouter-gpt-telegram-bot/config"
+	"openrouter-gpt-telegram-bot/user"
 	"strconv"
 )
 

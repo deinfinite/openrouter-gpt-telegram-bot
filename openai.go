@@ -6,10 +6,10 @@ import (
 	"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/sashabaranov/go-openai"
-	"gptBot/config"
-	"gptBot/user"
 	"io"
 	"log"
+	"openrouter-gpt-telegram-bot/config"
+	"openrouter-gpt-telegram-bot/user"
 	"time"
 )
 
