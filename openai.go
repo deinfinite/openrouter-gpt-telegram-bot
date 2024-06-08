@@ -89,7 +89,7 @@ func handleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 			lastSentTime = time.Now()
 		} else {
 			messageText += response.Choices[0].Delta.Content
-			if time.Since(lastSentTime) >= 1000*time.Millisecond {
+			if time.Since(lastSentTime) >= 800*time.Millisecond {
 				editMsg := tgbotapi.NewEditMessageText(message.Chat.ID, lastMessageID, messageText)
 				_, err := bot.Send(editMsg)
 				if err != nil {

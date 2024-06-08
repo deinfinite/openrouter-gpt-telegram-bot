@@ -34,7 +34,7 @@ func LoadConfig() (*Config, error) {
 	config := &Config{
 		TelegramBotToken:   os.Getenv("TELEGRAM_BOT_TOKEN"),
 		OpenAIApiKey:       os.Getenv("API_KEY"),
-		Model:              getEnv("MODEL", "gpt-3.5-turbo"),
+		Model:              getEnv("MODEL", "meta-llama/llama-3-8b-instruct:free"),
 		MaxTokens:          getEnvAsInt("MAX_TOKENS", 1200),
 		Temperature:        getEnvAsFloat("TEMPERATURE", 1.0),
 		BotLanguage:        getEnv("BOT_LANGUAGE", "en"),
@@ -43,8 +43,8 @@ func LoadConfig() (*Config, error) {
 		BudgetPeriod:       getEnv("BUDGET_PERIOD", "monthly"),
 		GuestBudget:        getEnvAsFloat("GUEST_BUDGET", 0),
 		UserBudget:         getEnvAsFloat("USER_BUDGET", 0),
-		AdminChatIDs:       getEnvAsIntList("ADMIN_USER_IDS"),
-		AllowedUserChatIDs: getEnvAsIntList("ALLOWED_TELEGRAM_USER_IDS"),
+		AdminChatIDs:       getEnvAsIntList("ADMIN_IDS"),
+		AllowedUserChatIDs: getEnvAsIntList("ALLOWED_USER_IDS"),
 		MaxHistorySize:     getEnvAsInt("MAX_HISTORY_SIZE", 10),
 	}
 

@@ -12,10 +12,17 @@ git clone https://github.com/defriend/openrouter-gpt-telegram-bot.git
 cd openrouter-gpt-telegram-bot
 ` 
 
-Rename example.env to .env and setup API keys and Telegram API token.
+Rename `example.env` to `.env` and setup API keys and Telegram API token.
+
 API Keys works from [Openrouter API](https://openrouter.ai/keys) and [OpenAI API](https://platform.openai.com/api-keys).
 
 Telegram API Token you can find in [@BotFather](https://t.me/BotFather).
+
+Add Admin IDs, Allowed User Ids and User and Guest Budget.
+
+You can use any model from Openrouter API.
+
+### Using Go
 
 **If you have go installed:**
 
