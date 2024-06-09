@@ -45,6 +45,17 @@ To build and run the bot using Docker Compose, execute:
 docker compose up
 ```
 
+## Features
+- **Customizable AI Models:** Choose from a variety of AI models to suit your specific needs.
+- **User Management:** Manages user interactions and tracks usage with a detailed usage tracker that supports budget management for different user roles including admins, registered users, and guests.
+- **Docker Support:** Offers Docker compatibility for easy deployment and scalability.
+-  **Command Support:** Includes several commands for user interaction:
+- - `/help`: Displays available commands.
+- - `/reset`: Clears the user history and can reset the system prompt to a default or specified state.
+- - `/stats`: Provides current usage statistics and message count.
+- - `/stop`: Terminates any active AI response streams.
+
+
 ## Acknowledgments
 - This project was inspired by and has used resources from:
     - [n3d1117/chatgpt-telegram-bot](https://github.com/n3d1117/chatgpt-telegram-bot)
