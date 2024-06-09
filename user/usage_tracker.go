@@ -12,11 +12,12 @@ import (
 )
 
 // NewUsageTracker initializes a new UsageTracker
-func NewUsageTracker(userID, userName, logsDir string) *UsageTracker {
+func NewUsageTracker(userID, userName, logsDir string, conf *config.Config) *UsageTracker {
 	ut := &UsageTracker{
-		UserID:   userID,
-		UserName: userName,
-		LogsDir:  logsDir,
+		UserID:       userID,
+		UserName:     userName,
+		LogsDir:      logsDir,
+		SystemPrompt: conf.SystemPrompt,
 		History: History{
 			messages: []Message{},
 		},

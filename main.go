@@ -4,6 +4,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	openai "github.com/sashabaranov/go-openai"
 	"log"
+	"openrouter-gpt-telegram-bot/api"
 	"openrouter-gpt-telegram-bot/config"
 	"openrouter-gpt-telegram-bot/user"
 	"strconv"
@@ -44,7 +45,7 @@ func main() {
 		if update.Message == nil {
 			continue
 		}
-		userStats := userManager.GetUser(update.SentFrom().ID, update.SentFrom().UserName)
+		userStats := userManager.GetUser(update.SentFrom().ID, update.SentFrom().UserName, conf)
 		if update.Message.IsCommand() {
 			switch update.Message.Command() {
 			case "help":
@@ -52,7 +53,15 @@ func main() {
 				bot.Send(msg)
 			case "reset":
 				userStats.ClearHistory()
+				args := update.Message.CommandArguments()
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "History cleared.")
+				if args == "system" {
+					userStats.SystemPrompt = conf.SystemPrompt
+					msg.Text = "History cleared. System prompt set to default."
+				} else if args != "" {
+					msg.Text = "History cleared. System prompt set to " + args + "."
+					userStats.SystemPrompt = args
+				}
 				bot.Send(msg)
 			case "stats":
 				usage := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
@@ -70,7 +79,7 @@ func main() {
 			go func(userStats *user.UsageTracker) {
 				// Handle user message
 				if userStats.HaveAccess(conf) {
-					responseID := handleChatGPTStreamResponse(bot, client, update.Message, conf, userStats)
+					responseID := api.HandleChatGPTStreamResponse(bot, client, update.Message, conf, userStats)
 					userStats.GetUsageFromApi(responseID, conf)
 				} else {
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You have exceeded your budget limit.")

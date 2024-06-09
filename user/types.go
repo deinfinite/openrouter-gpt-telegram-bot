@@ -9,6 +9,7 @@ type UsageTracker struct {
 	UserID        string
 	UserName      string
 	LogsDir       string
+	SystemPrompt  string
 	CurrentStream *openai.ChatCompletionStream
 	Usage         UserUsage
 	History       History

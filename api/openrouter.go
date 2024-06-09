@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"context"
@@ -13,16 +13,16 @@ import (
 	"time"
 )
 
-func handleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, message *tgbotapi.Message, config *config.Config, user *user.UsageTracker) string {
+func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, message *tgbotapi.Message, config *config.Config, user *user.UsageTracker) string {
 	ctx := context.Background()
 	user.CheckHistory(config.MaxHistorySize)
 	messages := []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleSystem,
-			Content: config.SystemPrompt,
+			Content: user.SystemPrompt,
 		},
 	}
-	log.Println(user.GetMessages())
+
 	for _, msg := range user.GetMessages() {
 		messages = append(messages, openai.ChatCompletionMessage{
 			Role:    msg.Role,
@@ -42,8 +42,9 @@ func handleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 	stream, err := client.CreateChatCompletionStream(ctx, req)
 	if err != nil {
 		fmt.Printf("ChatCompletionStream error: %v\n", err)
-		msg := tgbotapi.NewMessage(message.Chat.ID, "Error: "+err.Error())
-		bot.Send(msg)
+		//Dont need to show this error to user
+		//msg := tgbotapi.NewMessage(message.Chat.ID, "Error: "+err.Error())
+		//bot.Send(msg)
 		return ""
 	}
 	defer stream.Close()

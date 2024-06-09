@@ -2,6 +2,7 @@
 package user
 
 import (
+	"openrouter-gpt-telegram-bot/config"
 	"strconv"
 	"sync"
 )
@@ -19,7 +20,7 @@ func NewUserManager(logsDir string) *Manager {
 	}
 }
 
-func (um *Manager) GetUser(userID int64, userName string) *UsageTracker {
+func (um *Manager) GetUser(userID int64, userName string, conf *config.Config) *UsageTracker {
 	um.mu.Lock()
 	defer um.mu.Unlock()
 
@@ -27,7 +28,7 @@ func (um *Manager) GetUser(userID int64, userName string) *UsageTracker {
 		return user
 	}
 
-	user := NewUsageTracker(strconv.FormatInt(userID, 10), userName, um.LogsDir)
+	user := NewUsageTracker(strconv.FormatInt(userID, 10), userName, um.LogsDir, conf)
 	um.users[userID] = user
 	return user
 }
