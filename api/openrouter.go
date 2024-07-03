@@ -33,9 +33,16 @@ func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 		Role:    openai.ChatMessageRoleUser,
 		Content: message.Text,
 	})
-	req := config.Model.ModelReq
-	req.Messages = messages
-	req.Stream = true
+	req := openai.ChatCompletionRequest{
+		Model:            config.Model.ModelName,
+		FrequencyPenalty: float32(config.Model.FrequencyPenalty),
+		PresencePenalty:  float32(config.Model.PresencePenalty),
+		Temperature:      float32(config.Model.Temperature),
+		TopP:             float32(config.Model.TopP),
+		MaxTokens:        config.MaxTokens,
+		Messages:         messages,
+		Stream:           true,
+	}
 
 	stream, err := client.CreateChatCompletionStream(ctx, req)
 	if err != nil {
