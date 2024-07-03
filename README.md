@@ -23,7 +23,7 @@ Before you begin, ensure you have the following:
         - Obtain API keys from [Openrouter API](https://openrouter.ai/keys).
         - Get your Telegram API Token from [@BotFather](https://t.me/BotFather).
     - Set `ADMIN_USER_IDS` to specify Telegram user IDs of admins if you want to enable admin commands.
-    - Set `ALLOWED_TELEGRAM_USER_IDS` to specify which Telegram user IDs are allowed to interact with the bot or leave blank to allow all users (Dont forget to set up Guest Budget).
+    - Set `ALLOWED_TELEGRAM_USER_IDS` to specify which Telegram user IDs are allowed to interact with the bot or leave blank to allow all users (Don't forget to set up Guest Budget).
 
 3. **Set up user permissions and budgets in the `.env` file:**
     - Define budgets for users and guests using `USER_BUDGETS` and `GUEST_BUDGET` both variables can be set to 0.

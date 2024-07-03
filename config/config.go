@@ -2,7 +2,9 @@ package config
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/sashabaranov/go-openai"
 	"log"
+	//"openrouter-gpt-telegram-bot/api"
 	"os"
 	"strconv"
 	"strings"
@@ -11,7 +13,7 @@ import (
 type Config struct {
 	TelegramBotToken   string
 	OpenAIApiKey       string
-	Model              string
+	Model              ModelParameters
 	MaxTokens          int
 	Temperature        float32
 	BotLanguage        string
@@ -25,6 +27,19 @@ type Config struct {
 	MaxHistorySize     int
 }
 
+type ModelParameters struct {
+	ModelName         string
+	ModelReq          openai.ChatCompletionRequest
+	FrequencyPenalty  float64
+	MinP              float64
+	PresencePenalty   float64
+	RepetitionPenalty float64
+	Temperature       float64
+	TopA              float64
+	TopK              float64
+	TopP              float64
+}
+
 func LoadConfig() (*Config, error) {
 	err := godotenv.Load()
 	if err != nil {
@@ -32,9 +47,11 @@ func LoadConfig() (*Config, error) {
 	}
 
 	config := &Config{
-		TelegramBotToken:   os.Getenv("TELEGRAM_BOT_TOKEN"),
-		OpenAIApiKey:       os.Getenv("API_KEY"),
-		Model:              getEnv("MODEL", "meta-llama/llama-3-8b-instruct:free"),
+		TelegramBotToken: os.Getenv("TELEGRAM_BOT_TOKEN"),
+		OpenAIApiKey:     os.Getenv("API_KEY"),
+		Model: ModelParameters{
+			ModelName: getEnv("MODEL", "meta-llama/llama-3-8b-instruct:free"),
+		},
 		MaxTokens:          getEnvAsInt("MAX_TOKENS", 1200),
 		Temperature:        getEnvAsFloat("TEMPERATURE", 1.0),
 		BotLanguage:        getEnv("BOT_LANGUAGE", "en"),
@@ -47,8 +64,33 @@ func LoadConfig() (*Config, error) {
 		AllowedUserChatIDs: getEnvAsIntList("ALLOWED_USER_IDS"),
 		MaxHistorySize:     getEnvAsInt("MAX_HISTORY_SIZE", 10),
 	}
-
+	//Config model
+	setupParameters(config)
 	return config, nil
+}
+
+func setupParameters(conf *Config) *Config {
+	parameters, err := GetParameters(conf)
+	if err != nil {
+		return nil
+	}
+	conf.Model.FrequencyPenalty = parameters.FrequencyPenaltyP90
+	conf.Model.MinP = parameters.MinPP90
+	conf.Model.PresencePenalty = parameters.PresencePenaltyP90
+	conf.Model.RepetitionPenalty = parameters.RepetitionPenaltyP90
+	conf.Model.Temperature = parameters.TemperatureP90
+	conf.Model.TopA = parameters.TopAP90
+	conf.Model.TopK = parameters.TopKP90
+	conf.Model.TopP = parameters.TopPP90
+	conf.Model.ModelReq = openai.ChatCompletionRequest{
+		Model:            conf.Model.ModelName,
+		MaxTokens:        conf.MaxTokens,
+		Temperature:      float32(conf.Model.Temperature),
+		FrequencyPenalty: float32(conf.Model.FrequencyPenalty),
+		PresencePenalty:  float32(conf.Model.PresencePenalty),
+		TopP:             float32(conf.Model.TopP),
+	}
+	return conf
 }
 
 func getEnv(key, defaultValue string) string {

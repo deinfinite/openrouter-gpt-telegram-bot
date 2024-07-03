@@ -33,12 +33,10 @@ func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 		Role:    openai.ChatMessageRoleUser,
 		Content: message.Text,
 	})
-	req := openai.ChatCompletionRequest{
-		Model:     config.Model,
-		MaxTokens: config.MaxTokens,
-		Messages:  messages,
-		Stream:    true,
-	}
+	req := config.Model.ModelReq
+	req.Messages = messages
+	req.Stream = true
+
 	stream, err := client.CreateChatCompletionStream(ctx, req)
 	if err != nil {
 		fmt.Printf("ChatCompletionStream error: %v\n", err)
@@ -124,7 +122,7 @@ func handleChatGPTResponse(bot *tgbotapi.BotAPI, client *openai.Client, message 
 	})
 
 	req := openai.ChatCompletionRequest{
-		Model:       config.Model,
+		Model:       config.Model.ModelName,
 		MaxTokens:   config.MaxTokens,
 		Temperature: config.Temperature,
 		Messages:    messages,
