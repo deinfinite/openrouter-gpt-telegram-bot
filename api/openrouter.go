@@ -15,7 +15,8 @@ import (
 
 func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, message *tgbotapi.Message, config *config.Config, user *user.UsageTracker) string {
 	ctx := context.Background()
-	user.CheckHistory(config.MaxHistorySize)
+	user.CheckHistory(config.MaxHistorySize, config.MaxHistoryTime)
+	user.LastMessageTime = time.Now()
 	messages := []openai.ChatCompletionMessage{
 		{
 			Role:    openai.ChatMessageRoleSystem,

@@ -25,6 +25,7 @@ type Config struct {
 	AdminChatIDs       []int64
 	AllowedUserChatIDs []int64
 	MaxHistorySize     int
+	MaxHistoryTime     int
 }
 
 type ModelParameters struct {
@@ -63,6 +64,7 @@ func LoadConfig() (*Config, error) {
 		AdminChatIDs:       getEnvAsIntList("ADMIN_IDS"),
 		AllowedUserChatIDs: getEnvAsIntList("ALLOWED_USER_IDS"),
 		MaxHistorySize:     getEnvAsInt("MAX_HISTORY_SIZE", 10),
+		MaxHistoryTime:     getEnvAsInt("MAX_HISTORY_TIME", 3),
 	}
 	//Config model
 	setupParameters(config)
