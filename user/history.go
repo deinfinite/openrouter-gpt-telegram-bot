@@ -29,7 +29,7 @@ func (ut *UsageTracker) CheckHistory(maxMessages int, maxTime int) {
 	}
 	if ut.LastMessageTime.Before(time.Now().Add(-time.Duration(maxTime) * time.Minute)) {
 		// Remove messages older than the maximum time limit
-		ut.History = History{}
+		ut.History.messages = make([]Message, 0)
 	}
 
 	if len(ut.History.messages) > maxMessages {
