@@ -65,6 +65,7 @@ func main() {
 				}
 				bot.Send(msg)
 			case "stats":
+				userStats.CheckHistory(conf.MaxHistorySize, conf.MaxHistoryTime)
 				usage := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Current usage: "+usage+"$ Messages amount: "+strconv.Itoa(len(userStats.GetMessages())))
 				bot.Send(msg)
