@@ -59,7 +59,7 @@ func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 	var messageText string
 	var lastSentTime time.Time
 	responseID := ""
-	fmt.Printf("Stream response: ")
+	log.Printf("User: " + user.UserName + " Stream response. ")
 	for {
 		response, err := stream.Recv()
 		if responseID == "" {
