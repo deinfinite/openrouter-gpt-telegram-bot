@@ -30,10 +30,14 @@ func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 			Content: msg.Content,
 		})
 	}
-	messages = append(messages, openai.ChatCompletionMessage{
-		Role:    openai.ChatMessageRoleUser,
-		Content: message.Text,
-	})
+	if config.Vision == "true" {
+		messages = append(messages, addVisionMessage(bot, message, config))
+	} else {
+		messages = append(messages, openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: message.Text,
+		})
+	}
 	req := openai.ChatCompletionRequest{
 		Model:            config.Model.ModelName,
 		FrequencyPenalty: float32(config.Model.FrequencyPenalty),
@@ -107,6 +111,53 @@ func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 			}
 		}
 
+	}
+
+}
+
+func addVisionMessage(bot *tgbotapi.BotAPI, message *tgbotapi.Message, config *config.Config) openai.ChatCompletionMessage {
+	if len(message.Photo) > 0 {
+		// Assuming you want the largest photo size
+		photoSize := message.Photo[len(message.Photo)-1]
+		fileID := photoSize.FileID
+
+		// Download the photo
+		file, err := bot.GetFile(tgbotapi.FileConfig{FileID: fileID})
+		if err != nil {
+			log.Printf("Error getting file: %v", err)
+			return openai.ChatCompletionMessage{
+				Role:    openai.ChatMessageRoleUser,
+				Content: message.Text,
+			}
+		}
+
+		// Access the file URL
+		fileURL := file.Link(bot.Token)
+		fmt.Println("Photo URL:", fileURL)
+		if message.Text == "" {
+			message.Text = config.VisionPrompt
+		}
+
+		return openai.ChatCompletionMessage{
+			Role: openai.ChatMessageRoleUser,
+			MultiContent: []openai.ChatMessagePart{
+				{
+					Type: openai.ChatMessagePartTypeText,
+					Text: message.Text,
+				},
+				{
+					Type: openai.ChatMessagePartTypeImageURL,
+					ImageURL: &openai.ChatMessageImageURL{
+						URL: fileURL,
+					},
+				},
+			},
+		}
+	} else {
+		return openai.ChatCompletionMessage{
+			Role:    openai.ChatMessageRoleUser,
+			Content: message.Text,
+		}
 	}
 
 }

@@ -26,6 +26,8 @@ type Config struct {
 	AllowedUserChatIDs []int64
 	MaxHistorySize     int
 	MaxHistoryTime     int
+	Vision             string
+	VisionPrompt       string
 }
 
 type ModelParameters struct {
@@ -65,6 +67,8 @@ func LoadConfig() (*Config, error) {
 		AllowedUserChatIDs: getEnvAsIntList("ALLOWED_USER_IDS"),
 		MaxHistorySize:     getEnvAsInt("MAX_HISTORY_SIZE", 10),
 		MaxHistoryTime:     getEnvAsInt("MAX_HISTORY_TIME", 3),
+		Vision:             getEnv("VISION", "false"),
+		VisionPrompt:       getEnv("VISION_PROMPT", "Describe the image"),
 	}
 	//Config model
 	setupParameters(config)
