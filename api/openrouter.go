@@ -148,7 +148,8 @@ func addVisionMessage(bot *tgbotapi.BotAPI, message *tgbotapi.Message, config *c
 				{
 					Type: openai.ChatMessagePartTypeImageURL,
 					ImageURL: &openai.ChatMessageImageURL{
-						URL: fileURL,
+						URL:    fileURL,
+						Detail: openai.ImageURLDetail(config.VisionDetails),
 					},
 				},
 			},

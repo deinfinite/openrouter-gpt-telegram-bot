@@ -28,6 +28,7 @@ type Config struct {
 	MaxHistoryTime     int
 	Vision             string
 	VisionPrompt       string
+	VisionDetails      string
 }
 
 type ModelParameters struct {
@@ -69,6 +70,7 @@ func LoadConfig() (*Config, error) {
 		MaxHistoryTime:     getEnvAsInt("MAX_HISTORY_TIME", 3),
 		Vision:             getEnv("VISION", "false"),
 		VisionPrompt:       getEnv("VISION_PROMPT", "Describe the image"),
+		VisionDetails:      getEnv("VISION_DETAIL", "low"),
 	}
 	//Config model
 	setupParameters(config)
