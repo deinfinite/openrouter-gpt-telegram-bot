@@ -84,7 +84,7 @@ func main() {
 					responseID := api.HandleChatGPTStreamResponse(bot, client, update.Message, conf, userStats)
 					userStats.GetUsageFromApi(responseID, conf)
 				} else {
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You have exceeded your budget limit.")
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "You have no budget or you have exhausted it.")
 					_, err := bot.Send(msg)
 					if err != nil {
 						log.Println(err)
