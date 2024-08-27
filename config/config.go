@@ -102,11 +102,11 @@ func setupParameters(conf *Config) *Config {
 }
 
 func getEnv(key, defaultValue string) string {
-	value := os.Getenv(key)
-	if value == "" {
-		return defaultValue
+	if value, exists := os.LookupEnv(key); exists {
+		return value
 	}
-	return value
+	log.Printf("Warning: Failed to parse %s. Using default value.", key)
+	return defaultValue
 }
 
 func getEnvAsIntList(name string) []int64 {
@@ -131,10 +131,12 @@ func getEnvAsIntList(name string) []int64 {
 func getEnvAsInt(name string, defaultValue int) int {
 	valueStr := os.Getenv(name)
 	if valueStr == "" {
+		log.Printf("Environment variable %s not set, using default value: %d", name, defaultValue)
 		return defaultValue
 	}
 	value, err := strconv.Atoi(valueStr)
 	if err != nil {
+		log.Printf("Error parsing environment variable %s: %v. Using default value: %d", name, err, defaultValue)
 		return defaultValue
 	}
 	return value
@@ -148,6 +150,7 @@ func getEnvAsFloat(name string, defaultValue float32) float32 {
 
 	value, err := strconv.ParseFloat(valueStr, 32)
 	if err != nil {
+		log.Printf("Warning: Failed to parse %s as float: %v. Using default value.", name, err)
 		return defaultValue
 	}
 	return float32(value)

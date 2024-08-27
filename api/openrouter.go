@@ -93,7 +93,7 @@ func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 			msg := tgbotapi.NewMessage(message.Chat.ID, messageText)
 			sentMsg, err := bot.Send(msg)
 			if err != nil {
-				log.Printf("Failed to send message: %v", err)
+				//log.Printf("Failed to send message: %v", err)
 				continue
 			}
 			lastMessageID = sentMsg.MessageID

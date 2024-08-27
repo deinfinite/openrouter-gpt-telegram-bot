@@ -8,6 +8,7 @@ import (
 	"openrouter-gpt-telegram-bot/config"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 )
 
@@ -39,16 +40,18 @@ func (ut *UsageTracker) HaveAccess(conf *config.Config) bool {
 		idStr := fmt.Sprintf("%d", id)
 		if ut.UserID == idStr {
 			currentCost := ut.GetCurrentCost(conf.BudgetPeriod)
+
 			if float64(conf.UserBudget) > currentCost {
-				log.Println("User")
+				log.Println("ID:", idStr, " UserBudget:", conf.UserBudget, " CurrentCost:", currentCost)
 				return true
 			}
 			return false
 		}
 	}
 	currentCost := ut.GetCurrentCost(conf.BudgetPeriod)
+
 	if float64(conf.GuestBudget) > currentCost {
-		log.Println("Guest")
+		log.Println("ID:", ut.UserID, " GuestBudget:", conf.GuestBudget, " CurrentCost:", currentCost)
 		return true
 	}
 	return false
@@ -133,11 +136,13 @@ func calculateCostForDay(chatCost map[string]float64, day string) float64 {
 func calculateCostForMonth(chatCost map[string]float64, today string) float64 {
 	cost := 0.0
 	month := today[:7]
+
 	for date, dailyCost := range chatCost {
-		if date[:7] == month {
+		if strings.HasPrefix(date, month) {
 			cost += dailyCost
 		}
 	}
+
 	return cost
 }
 
@@ -176,8 +181,8 @@ func (ut *UsageTracker) GetUsageFromApi(id string, conf *config.Config) {
 		panic(err)
 	}
 	//For testing purpose
-	fmt.Printf("Generation ID: %s\n", generationResponse.Data.ID)
-	fmt.Printf("Model: %s\n", generationResponse.Data.Model)
-	fmt.Printf("Total Cost: %.4f\n", generationResponse.Data.TotalCost)
+	//fmt.Printf("Generation ID: %s\n", generationResponse.Data.ID)
+	//fmt.Printf("Model: %s\n", generationResponse.Data.Model)
+	fmt.Printf("Total Cost: %.6f\n", generationResponse.Data.TotalCost)
 	ut.AddCost(generationResponse.Data.TotalCost)
 }
