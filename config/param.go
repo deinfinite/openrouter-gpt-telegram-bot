@@ -41,7 +41,7 @@ type Response struct {
 }
 
 func GetParameters(conf *Config) (ModelResponse, error) {
-	url := fmt.Sprintf("https://api.example.com/models/%s/parameters", conf.Model.ModelName)
+	url := fmt.Sprintf("https://openrouter.ai/api/v1/parameters/{modelId}%s", conf.Model.ModelName)
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

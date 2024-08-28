@@ -1,10 +1,14 @@
 package config
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/sashabaranov/go-openai"
 	"log"
+	"reflect"
+
 	//"openrouter-gpt-telegram-bot/api"
+	"openrouter-gpt-telegram-bot/lang"
 	"os"
 	"strconv"
 	"strings"
@@ -29,6 +33,7 @@ type Config struct {
 	Vision             string
 	VisionPrompt       string
 	VisionDetails      string
+	Lang               string
 }
 
 type ModelParameters struct {
@@ -71,16 +76,21 @@ func LoadConfig() (*Config, error) {
 		Vision:             getEnv("VISION", "false"),
 		VisionPrompt:       getEnv("VISION_PROMPT", "Describe the image"),
 		VisionDetails:      getEnv("VISION_DETAIL", "low"),
+		Lang:               getEnv("LANG", "en"),
 	}
+
+	language := lang.Translate("lang", config.Lang)
+	config.SystemPrompt = "Always answer on " + language + " language." + config.SystemPrompt
 	//Config model
-	setupParameters(config)
+	config = setupParameters(config)
+	printConfig(config)
 	return config, nil
 }
 
 func setupParameters(conf *Config) *Config {
 	parameters, err := GetParameters(conf)
 	if err != nil {
-		return nil
+		log.Fatal(err)
 	}
 	conf.Model.FrequencyPenalty = parameters.FrequencyPenaltyP90
 	conf.Model.MinP = parameters.MinPP90
@@ -154,4 +164,34 @@ func getEnvAsFloat(name string, defaultValue float32) float32 {
 		return defaultValue
 	}
 	return float32(value)
+}
+
+func printConfig(c *Config) {
+	if c == nil {
+		fmt.Println("Config is nil")
+		return
+	}
+	v := reflect.ValueOf(*c)
+	t := v.Type()
+
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+		fieldName := t.Field(i).Name
+
+		if field.Kind() == reflect.Struct {
+			fmt.Printf("%s:\n", fieldName)
+			printStructFields(field)
+		} else {
+			fmt.Printf("%s: %v\n", fieldName, field.Interface())
+		}
+	}
+}
+
+func printStructFields(v reflect.Value) {
+	t := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+		fieldName := t.Field(i).Name
+		fmt.Printf("  %s: %v\n", fieldName, field.Interface())
+	}
 }
