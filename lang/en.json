@@ -1,5 +1,6 @@
 {
   "commands": {
+    "lang": "en",
     "start":  "<b>Welcome! I'm a GPT bot created to assist and chat with you.</b>\n\nHere's what I can do:\n• Answer your questions and engage in dialogue on various topics\n• Help with programming tasks and data analysis\n• Explain complex concepts in simple terms\n• Generate ideas and propose solutions to problems\n\n",
     "start_end": "\n\nJust send me a message, and I'll try to help!",
     "help": "<b>Available Commands:</b>\n\n<code>/help</code> - Show this help message\n<code>/reset</code> - Clear conversation history\n<code>/reset system</code> - Reset system prompt to default\n<code>/reset [new prompt]</code> - Set a new system prompt\n<code>/stats</code> - Show current usage statistics\n<code>/stop</code> - Stop the active stream.",
@@ -16,5 +17,6 @@
     "stats": "Show usage statistics",
     "stop": "Stop the current request"
   },
-  "budget_out": "You have no budget or you have exhausted it."
+  "budget_out": "You have no budget or you have exhausted it.",
+
 }

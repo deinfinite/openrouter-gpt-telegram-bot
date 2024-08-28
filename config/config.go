@@ -63,7 +63,6 @@ func LoadConfig() (*Config, error) {
 		},
 		MaxTokens:          getEnvAsInt("MAX_TOKENS", 1200),
 		Temperature:        getEnvAsFloat("TEMPERATURE", 1.0),
-		BotLanguage:        getEnv("BOT_LANGUAGE", "en"),
 		OpenAIBaseURL:      os.Getenv("BASE_URL"),
 		SystemPrompt:       getEnv("ASSISTANT_PROMPT", "I am a chatbot. I am here to help you."),
 		BudgetPeriod:       getEnv("BUDGET_PERIOD", "monthly"),
