@@ -99,15 +99,20 @@ func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 			lastMessageID = sentMsg.MessageID
 			lastSentTime = time.Now()
 		} else {
-			messageText += response.Choices[0].Delta.Content
-			if time.Since(lastSentTime) >= 800*time.Millisecond {
-				editMsg := tgbotapi.NewEditMessageText(message.Chat.ID, lastMessageID, messageText)
-				_, err := bot.Send(editMsg)
-				if err != nil {
-					log.Printf("Failed to edit message: %v", err)
-					continue
+			if len(response.Choices) > 0 {
+				messageText += response.Choices[0].Delta.Content
+				if time.Since(lastSentTime) >= 800*time.Millisecond {
+					editMsg := tgbotapi.NewEditMessageText(message.Chat.ID, lastMessageID, messageText)
+					_, err := bot.Send(editMsg)
+					if err != nil {
+						log.Printf("Failed to edit message: %v", err)
+						continue
+					}
+					lastSentTime = time.Now()
 				}
-				lastSentTime = time.Now()
+			} else {
+				log.Printf("Received empty response choices")
+				continue
 			}
 		}
 
