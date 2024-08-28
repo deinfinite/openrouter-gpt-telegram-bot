@@ -78,7 +78,7 @@ func LoadConfig() (*Config, error) {
 		Lang:               getEnv("LANG", "en"),
 	}
 
-	language := lang.Translate("lang", config.Lang)
+	language := lang.Translate("language", config.Lang)
 	config.SystemPrompt = "Always answer on " + language + " language." + config.SystemPrompt
 	//Config model
 	config = setupParameters(config)

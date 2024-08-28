@@ -1,5 +1,5 @@
 {
-  "lang": "en",
+  "language": "english",
   "commands": {
     "start":  "<b>Welcome! I'm a GPT bot created to assist and chat with you.</b>\n\nHere's what I can do:\n• Answer your questions and engage in dialogue on various topics\n• Help with programming tasks and data analysis\n• Explain complex concepts in simple terms\n• Generate ideas and propose solutions to problems\n\n",
     "start_end": "\n\nJust send me a message, and I'll try to help!",
