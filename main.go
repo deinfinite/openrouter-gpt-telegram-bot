@@ -89,20 +89,31 @@ func main() {
 				}
 				bot.Send(msg)
 			case "stats":
-				userStats.CheckHistory(conf.MaxHistorySize, conf.MaxHistoryTime)
-				countedUsage := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
-				todayUsage := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
-				monthUsage := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
-				totalUsage := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
-				messagesCount := strconv.Itoa(len(userStats.GetMessages()))
+				if userStats.CanViewStats(conf) {
+					userStats.CheckHistory(conf.MaxHistorySize, conf.MaxHistoryTime)
+					countedUsage := strconv.FormatFloat(userStats.GetCurrentCost(conf.BudgetPeriod), 'f', 6, 64)
+					todayUsage := strconv.FormatFloat(userStats.GetCurrentCost("daily"), 'f', 6, 64)
+					monthUsage := strconv.FormatFloat(userStats.GetCurrentCost("monthly"), 'f', 6, 64)
+					totalUsage := strconv.FormatFloat(userStats.GetCurrentCost("total"), 'f', 6, 64)
+					messagesCount := strconv.Itoa(len(userStats.GetMessages()))
 
-				statsMessage := fmt.Sprintf(
-					lang.Translate("commands.stats", conf.Lang),
-					countedUsage, todayUsage, monthUsage, totalUsage, messagesCount)
+					statsMessage := fmt.Sprintf(
+						lang.Translate("commands.stats", conf.Lang),
+						countedUsage, todayUsage, monthUsage, totalUsage, messagesCount)
 
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, statsMessage)
-				msg.ParseMode = "HTML"
-				bot.Send(msg)
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, statsMessage)
+
+					msg.ParseMode = "HTML"
+					bot.Send(msg)
+				} else {
+					messagesCount := strconv.Itoa(len(userStats.GetMessages()))
+					statsMessage := fmt.Sprintf(
+						lang.Translate("commands.stats_min", conf.Lang), messagesCount)
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, statsMessage)
+					msg.ParseMode = "HTML"
+					bot.Send(msg)
+				}
+
 			case "stop":
 				if userStats.CurrentStream != nil {
 					userStats.CurrentStream.Close()

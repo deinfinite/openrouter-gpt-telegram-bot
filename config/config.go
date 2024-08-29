@@ -33,6 +33,7 @@ type Config struct {
 	Vision             string
 	VisionPrompt       string
 	VisionDetails      string
+	StatsMinRole       string
 	Lang               string
 }
 
@@ -75,7 +76,8 @@ func LoadConfig() (*Config, error) {
 		Vision:             getEnv("VISION", "false"),
 		VisionPrompt:       getEnv("VISION_PROMPT", "Describe the image"),
 		VisionDetails:      getEnv("VISION_DETAIL", "low"),
-		Lang:               getEnv("LANG", "en"),
+		StatsMinRole:       getEnv("STATS_MIN_ROLE", "ADMIN"),
+		Lang:               getEnv("LANG", "EN"),
 	}
 
 	language := lang.Translate("language", config.Lang)

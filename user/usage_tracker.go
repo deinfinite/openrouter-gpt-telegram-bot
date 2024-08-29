@@ -58,6 +58,27 @@ func (ut *UsageTracker) HaveAccess(conf *config.Config) bool {
 
 }
 
+func (ut *UsageTracker) GetUserRole(conf *config.Config) string {
+	for _, id := range conf.AdminChatIDs {
+		idStr := fmt.Sprintf("%d", id)
+		if ut.UserID == idStr {
+			return "ADMIN"
+		}
+	}
+	for _, id := range conf.AllowedUserChatIDs {
+		idStr := fmt.Sprintf("%d", id)
+		if ut.UserID == idStr {
+			return "USER"
+		}
+	}
+	return "GUEST"
+}
+
+func (ut *UsageTracker) CanViewStats(conf *config.Config) bool {
+	userRole := ut.GetUserRole(conf)
+	return userRole == "ADMIN" || (conf.StatsMinRole == "USER" && userRole != "GUEST")
+}
+
 // loadOrCreateUsage loads or creates the usage file for a user
 func (ut *UsageTracker) loadOrCreateUsage() {
 	userFile := filepath.Join(ut.LogsDir, ut.UserID+".json")

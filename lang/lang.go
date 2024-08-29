@@ -13,7 +13,7 @@ var translations map[string]map[string]interface{}
 func LoadTranslations(langDir string) error {
 	translations = make(map[string]map[string]interface{})
 
-	languages := []string{"en", "ru"}
+	languages := []string{"EN", "RU"}
 
 	for _, lang := range languages {
 		filePath := filepath.Join(langDir, lang+".json")
