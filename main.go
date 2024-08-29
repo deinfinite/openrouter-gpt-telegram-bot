@@ -79,10 +79,10 @@ func main() {
 			case "reset":
 				userStats.ClearHistory()
 				args := update.Message.CommandArguments()
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "History cleared.")
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, lang.Translate("commands.reset", conf.Lang))
 				if args == "system" {
 					userStats.SystemPrompt = conf.SystemPrompt
-					msg.Text = lang.Translate("commands.reset", conf.Lang)
+					msg.Text = lang.Translate("commands.reset_system", conf.Lang)
 				} else if args != "" {
 					msg.Text = lang.Translate("commands.reset_prompt", conf.Lang) + args + "."
 					userStats.SystemPrompt = args
