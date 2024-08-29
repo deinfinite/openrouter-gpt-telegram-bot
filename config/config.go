@@ -79,7 +79,7 @@ func LoadConfig() (*Config, error) {
 	}
 
 	language := lang.Translate("language", config.Lang)
-	config.SystemPrompt = "Always answer on " + language + " language." + config.SystemPrompt
+	config.SystemPrompt = "Always answer in " + language + " language." + config.SystemPrompt
 	//Config model
 	config = setupParameters(config)
 	printConfig(config)
@@ -91,14 +91,14 @@ func setupParameters(conf *Config) *Config {
 	if err != nil {
 		log.Fatal(err)
 	}
-	conf.Model.FrequencyPenalty = parameters.FrequencyPenaltyP90
-	conf.Model.MinP = parameters.MinPP90
-	conf.Model.PresencePenalty = parameters.PresencePenaltyP90
-	conf.Model.RepetitionPenalty = parameters.RepetitionPenaltyP90
-	conf.Model.Temperature = parameters.TemperatureP90
-	conf.Model.TopA = parameters.TopAP90
-	conf.Model.TopK = parameters.TopKP90
-	conf.Model.TopP = parameters.TopPP90
+	conf.Model.FrequencyPenalty = parameters.FrequencyPenaltyP50
+	conf.Model.MinP = parameters.MinPP50
+	conf.Model.PresencePenalty = parameters.PresencePenaltyP50
+	conf.Model.RepetitionPenalty = parameters.RepetitionPenaltyP50
+	conf.Model.Temperature = parameters.TemperatureP50
+	conf.Model.TopA = parameters.TopAP50
+	conf.Model.TopK = parameters.TopKP50
+	conf.Model.TopP = parameters.TopPP50
 	conf.Model.ModelReq = openai.ChatCompletionRequest{
 		Model:            conf.Model.ModelName,
 		MaxTokens:        conf.MaxTokens,
