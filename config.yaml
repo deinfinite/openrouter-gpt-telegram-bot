@@ -1,5 +1,5 @@
 # Telegram user ID of admins, or empty to assign no admin
-admin_ids: ""
+admin_ids: "241536217"
 
 # Allowed USER Ids
 allowed_user_ids: ""
@@ -10,7 +10,7 @@ guest_budget: 0.5
 # Budget period: daily, monthly, total
 budget_period: monthly
 # Language to use for the bot, now supported: EN, RU
-lang: EN
+lang: RU
 
 # Minimum role to show stats. Supported values: ADMIN, USER, GUEST
 stats_min_role: ADMIN
@@ -18,7 +18,7 @@ token_price: 0.002
 
 # Model configuration
 type: openrouter
-model: openai/gpt-4o-mini
+model: mistralai/mistral-7b-instruct
 base_url: https://openrouter.ai/api/v1
 temperature: 0.7
 top_p: 0.9
