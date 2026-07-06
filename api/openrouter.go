@@ -4,13 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
-	"github.com/sashabaranov/go-openai"
 	"io"
 	"log"
+	"net/http"
 	"openrouter-gpt-telegram-bot/config"
 	"openrouter-gpt-telegram-bot/user"
+	"path/filepath"
+	"strings"
 	"time"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/sashabaranov/go-openai"
 )
 
 func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, message *tgbotapi.Message, config *config.Config, user *user.UsageTracker) string {
@@ -35,7 +39,7 @@ func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 	} else {
 		messages = append(messages, openai.ChatCompletionMessage{
 			Role:    openai.ChatMessageRoleUser,
-			Content: message.Text,
+			Content: getMessageContent(bot, message),
 		})
 	}
 	req := openai.ChatCompletionRequest{
@@ -71,7 +75,7 @@ func HandleChatGPTStreamResponse(bot *tgbotapi.BotAPI, client *openai.Client, me
 		}
 		if errors.Is(err, io.EOF) {
 			fmt.Println("\nStream finished, response ID:", responseID)
-			user.AddMessage(openai.ChatMessageRoleUser, message.Text)
+			user.AddMessage(openai.ChatMessageRoleUser, getMessageContent(bot, message))
 			user.AddMessage(openai.ChatMessageRoleAssistant, messageText)
 			editMsg := tgbotapi.NewEditMessageText(message.Chat.ID, lastMessageID, messageText)
 			_, err := bot.Send(editMsg)
@@ -184,7 +188,7 @@ func handleChatGPTResponse(bot *tgbotapi.BotAPI, client *openai.Client, message 
 	}
 	messages = append(messages, openai.ChatCompletionMessage{
 		Role:    openai.ChatMessageRoleUser,
-		Content: message.Text,
+		Content: getMessageContent(bot, message),
 	})
 
 	req := openai.ChatCompletionRequest{
@@ -207,4 +211,74 @@ func handleChatGPTResponse(bot *tgbotapi.BotAPI, client *openai.Client, message 
 	user.AddMessage(openai.ChatMessageRoleAssistant, answer)
 	bot.Send(msg)
 	return resp.ID
+}
+
+const maxFileSize = 5 * 1024 * 1024 // 5MB
+
+var httpClient = &http.Client{Timeout: 30 * time.Second}
+
+// getMessageContent extracts the message text, handling caption for documents
+// and appending content of attached text files.
+func getMessageContent(bot *tgbotapi.BotAPI, message *tgbotapi.Message) string {
+	content := message.Text
+	if content == "" {
+		content = message.Caption
+	}
+	if message.Document != nil {
+		if message.Document.FileSize > maxFileSize {
+			log.Printf("File too large: %s (%d bytes)", message.Document.FileName, message.Document.FileSize)
+			return content
+		}
+		fileContent, err := getDocumentContent(bot, message.Document)
+		if err == nil && isTextFile(message.Document.FileName) {
+			if content != "" {
+				content += "\n\n"
+			}
+			content += "Content of attached file '" + message.Document.FileName + "':\n\n" + fileContent
+		}
+	}
+	return content
+}
+
+// isTextFile checks if a file is a text file based on its extension.
+func isTextFile(filename string) bool {
+	ext := strings.ToLower(filepath.Ext(filename))
+	textExtensions := []string{".txt", ".md", ".csv", ".json", ".xml", ".html", ".css", ".js", ".go", ".py", ".java", ".c", ".cpp", ".h", ".hpp", ".log"}
+
+	for _, textExt := range textExtensions {
+		if ext == textExt {
+			return true
+		}
+	}
+
+	return false
+}
+
+// getDocumentContent downloads and returns the content of a document from Telegram.
+func getDocumentContent(bot *tgbotapi.BotAPI, document *tgbotapi.Document) (string, error) {
+	fileConfig := tgbotapi.FileConfig{
+		FileID: document.FileID,
+	}
+	file, err := bot.GetFile(fileConfig)
+	if err != nil {
+		log.Printf("Error getting file: %v", err)
+		return "", err
+	}
+
+	fileURL := file.Link(bot.Token)
+
+	resp, err := httpClient.Get(fileURL)
+	if err != nil {
+		log.Printf("Error downloading file: %v", err)
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	content, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Error reading file content: %v", err)
+		return "", err
+	}
+
+	return string(content), nil
 }
